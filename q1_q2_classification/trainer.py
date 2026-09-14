@@ -64,7 +64,12 @@ def train(args, model, optimizer, scheduler=None, model_name='model'):
                 writer.add_scalar("Loss/train", loss.item(), cnt)
                 print('Train Epoch: {} [{} ({:.0f}%)]\tLoss: {:.6f}'.format(epoch, cnt, 100. * batch_idx / len(train_loader), loss.item()))
                 
-                # Log gradients
+                # Log gradients. For the Q2 handout's requested histograms:
+                # "Conv1 Layer": layer1.1.conv1.weight
+                # "BN4 layer": layer4.0.bn2.bias
+                # With the ResNet wrapper, TensorBoard tags are
+                # resnet.layer1.1.conv1.weight/grad and
+                # resnet.layer4.0.bn2.bias/grad.
                 for tag, value in model.named_parameters():
                     if value.grad is not None:
                         writer.add_histogram(tag + "/grad", value.grad.cpu().numpy(), cnt)

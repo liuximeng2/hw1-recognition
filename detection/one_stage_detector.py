@@ -77,6 +77,8 @@ class DetectorBackboneWithFPN(nn.Module):
         # This behaves like a Python dict, but makes PyTorch understand that
         # there are trainable weights inside it.
         # Add THREE lateral 1x1 conv and THREE output 3x3 conv layers.
+        # A ReLU after each output 3x3 "smoothing" convolution is optional;
+        # either choice is acceptable.
         self.fpn_params = nn.ModuleDict()
         ######################################################################
         #                            END OF YOUR CODE                        #
@@ -141,6 +143,11 @@ class FCOSPredictionNetwork(nn.Module):
         # box stem. The prediction layers for box regression and centerness
         # operate on the output of `stem_box`.
         # See FCOS figure again; both stems are identical.
+        # Build each stem dynamically: one conv+ReLU pair per entry in
+        # `stem_channels`, using that entry as the convolution's output width.
+        # Each stem has len(stem_channels) pairs; do not hard-code four pairs.
+        # The first convolution takes `in_channels`; subsequent convolutions
+        # take the preceding entry's output width.
         #
         # Use `in_channels` and `stem_channels` for creating these layers, the
         # docstring above tells you what they mean. Initialize weights of each
@@ -172,6 +179,11 @@ class FCOSPredictionNetwork(nn.Module):
         #     1. object class logits (`num_classes` outputs)
         #     2. box regression deltas (4 outputs: LTRB deltas from locations)
         #     3. centerness logits (1 output)
+        # Each prediction head needs its own convolution pathway. Pathway
+        # depth is a design choice, not a fixed number from the paper.
+        # The box and centerness heads may share `stem_box` as described below,
+        # but must have separate prediction convolutions. Keep `pred_cls` as
+        # the final class convolution for the bias initialization below.
         ######################################################################
 
         # Replace these lines with your code, keep variable names unchanged.

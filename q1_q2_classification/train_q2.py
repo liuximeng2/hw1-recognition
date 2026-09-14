@@ -40,10 +40,11 @@ if __name__ == "__main__":
 
     ##################################################################
     # TODO: Create hyperparameter argument class
-    # We will use a size of 224x224 for the rest of the questions. 
+    # Input size affects performance: in our 50-epoch reference runs,
+    # 64x64 inputs gave about 0.59 mAP, and 224x224 gave about 0.79 mAP.
     # Note that you might have to change the augmentations
     # You should experiment and choose the correct hyperparameters
-    # You should get a map of around 50 in 50 epochs
+    # Aim for around 0.8 mAP with 224x224 inputs in 50 epochs.
     ##################################################################
     # args = ARGS(
     #     epochs=50,
@@ -79,3 +80,11 @@ if __name__ == "__main__":
     # trains model using your training code and reports test map
     test_ap, test_map = trainer.train(args, model, optimizer, scheduler)
     print('test map:', test_map)
+
+    # Q2 t-SNE plot guidance:
+    # Use this fine-tuned Q2 classifier in evaluation mode, not a fresh
+    # ImageNet model. Extract the average pooling output immediately before
+    # the final fully connected layer (resnet.avgpool), and flatten it to
+    # one 512-dimensional feature vector per image for ResNet-18.
+    # Use the 20 base PASCAL VOC classes (VOCDataset.CLASS_NAMES) in the
+    # legend, rather than creating entries for multi-label combinations.
