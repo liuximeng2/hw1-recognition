@@ -40,11 +40,9 @@ if __name__ == "__main__":
 
     ##################################################################
     # TODO: Create hyperparameter argument class
-    # Input size affects performance: in our 50-epoch reference runs,
-    # 64x64 inputs gave about 0.59 mAP, and 224x224 gave about 0.79 mAP.
     # Note that you might have to change the augmentations
     # You should experiment and choose the correct hyperparameters
-    # Aim for around 0.8 mAP with 224x224 inputs in 50 epochs.
+    # Aim for an mAP of around 0.8 (80%) in 50 epochs.
     ##################################################################
     # args = ARGS(
     #     epochs=50,
