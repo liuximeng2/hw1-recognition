@@ -53,7 +53,14 @@ def train(args, model, optimizer, scheduler=None, model_name='model'):
             # Function Outputs:
             #   - `output`: Computed loss, a single floating point number
             ##################################################################
-            loss = 0
+            # 20 independent binary problems (not a softmax over classes).
+            # Stable BCE-with-logits: max(x,0) - x*y + log(1+exp(-|x|))
+            # avoids overflow from exp(x) and underflow from log(sigmoid(x)).
+            bce = torch.clamp(output, min=0) - output * target + torch.log(
+                1 + torch.exp(-torch.abs(output))
+            )
+            # wgt==0 for difficult objects; they do not contribute to the loss
+            loss = (wgt * bce).sum() / torch.clamp(wgt.sum(), min=1.0)
             ##################################################################
             #                          END OF YOUR CODE                      #
             ##################################################################

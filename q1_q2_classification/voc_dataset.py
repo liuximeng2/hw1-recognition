@@ -12,6 +12,17 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 
 
+class GaussianNoise:
+    """Add isotropic Gaussian noise to a PIL image (pixel range [0, 255])."""
+    def __init__(self, std=8.0):
+        self.std = std
+
+    def __call__(self, img):
+        arr = np.asarray(img).astype(np.float32)
+        arr = np.clip(arr + np.random.randn(*arr.shape) * self.std, 0, 255)
+        return Image.fromarray(arr.astype(np.uint8))
+
+
 class VOCDataset(Dataset):
     CLASS_NAMES = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car',
                    'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
@@ -72,6 +83,13 @@ class VOCDataset(Dataset):
             # The difficult attribute specifies whether a class is ambiguous and by setting its weight to zero it does not contribute to the loss during training 
             weight_vec = torch.ones(20)
 
+            # each <object> has a class name and a difficult flag
+            for obj in tree.findall('object'):
+                cls_idx = self.INV_CLASS[obj.find('name').text]
+                class_vec[cls_idx] = 1
+                if int(obj.find('difficult').text) == 1:
+                    weight_vec[cls_idx] = 0
+
             ######################################################################
             #                            END OF YOUR CODE                        #
             ######################################################################
@@ -92,7 +110,19 @@ class VOCDataset(Dataset):
         # change and you will have to write the correct value of `flat_dim`
         # in line 46 in simple_cnn.py
         ######################################################################
-        pass
+        # Keep H=W=self.size so SimpleCNN.flat_dim (from inp_size) stays valid.
+        # Pad-then-crop jitter on train; matching center crop on test is a no-op
+        # after Resize((size, size)), which is what we want at eval time.
+        if self.split == 'test':
+            return [transforms.CenterCrop(self.size)]
+
+        return [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.RandomRotation(15),
+            transforms.RandomApply([GaussianNoise(std=8.0)], p=0.5),
+            transforms.RandomCrop(self.size, padding=4),
+        ]
         ######################################################################
         #                            END OF YOUR CODE                        #
         ######################################################################

@@ -12,22 +12,19 @@ if __name__ == "__main__":
     random.seed(0)
 
     ##################################################################
-    # TODO: Create hyperparameter argument class
-    # Use image size of 64x64 in Q1. We will use a default size of
-    # 224x224 for the rest of the questions.
-    # You should experiment and choose the correct hyperparameters
-    # You should get a map of around 22 in 5 epochs
+    # Create hyperparameter argument class with filled-in values
+    # Use image size of 64x64 in Q1. Targeting mAP ~22 in 5 epochs
     ##################################################################
-    # args = ARGS(
-    #     epochs=10,
-    #     inp_size=64,
-    #     use_cuda=True,
-    #     val_every=70
-    #     lr=# TODO,
-    #     batch_size=#TODO,
-    #     step_size=#TODO,
-    #     gamma=#TODO
-    # )
+    args = ARGS(
+        epochs=5,            # 5 epochs as targeted
+        inp_size=64,         # Q1: 64x64 resolution
+        use_cuda=True,       # use GPU if available
+        val_every=70,        # validate every 70 steps (about one "epoch" on trainval split)
+        lr=1e-2,             # Adam default, good for small nets
+        batch_size=128,      # 128 is good compromise for speed/memory
+        step_size=2,         # decay learning rate every 2 epochs
+        gamma=0.5            # decay LR by half
+    )
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################

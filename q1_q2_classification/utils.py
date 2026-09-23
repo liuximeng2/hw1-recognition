@@ -64,7 +64,13 @@ class ARGS(object):
     
     @property
     def device(self):
-        return torch.device("cuda" if self.use_cuda else "cpu")
+        if self.use_cuda:
+            if torch.cuda.is_available():
+                return torch.device("cuda")
+            # Apple Silicon: CUDA is unavailable, but Metal (MPS) is a GPU.
+            if torch.backends.mps.is_available():
+                return torch.device("mps")
+        return torch.device("cpu")
 
 
 def get_data_loader(name='voc', train=True, batch_size=64, split='train', inp_size=224):
