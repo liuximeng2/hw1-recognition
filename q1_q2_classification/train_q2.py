@@ -17,17 +17,20 @@ class ResNet(nn.Module):
         ##################################################################
         # TODO: Define a FC layer here to process the features
         ##################################################################
-        pass
+        # ResNet-18 avg-pools to 512-d. Drop the 1000-way ImageNet
+        # classifier and use a randomly initialized head for VOC.
+        in_features = self.resnet.fc.in_features
+        self.resnet.fc = nn.Linear(in_features, num_classes)
         ##################################################################
         #                          END OF YOUR CODE                      #
         ##################################################################
-        
 
     def forward(self, x):
         ##################################################################
         # TODO: Return raw outputs here
         ##################################################################
-        pass
+        # Logits, not probabilities: trainer.py applies BCE-with-logits.
+        return self.resnet(x)
         ##################################################################
         #                          END OF YOUR CODE                      #
         ##################################################################
@@ -44,16 +47,19 @@ if __name__ == "__main__":
     # You should experiment and choose the correct hyperparameters
     # Aim for an mAP of around 0.8 (80%) in 50 epochs.
     ##################################################################
-    # args = ARGS(
-    #     epochs=50,
-    #     inp_size=64,
-    #     use_cuda=True,
-    #     val_every=70
-    #     lr=# TODO,
-    #     batch_size=#TODO,
-    #     step_size=#TODO,
-    #     gamma=#TODO
-    # )
+    args = ARGS(
+        epochs=50,
+        inp_size=224,
+        use_cuda=True,
+        val_every=157,       # once per epoch (5011 / 32)
+        log_every=50,
+        lr=1e-4,
+        batch_size=32,
+        step_size=20,        # decay at epochs 20 and 40
+        gamma=0.1,
+        test_batch_size=256,
+        save_at_end=True,
+    )
     ##################################################################
     #                          END OF YOUR CODE                      #
     ##################################################################

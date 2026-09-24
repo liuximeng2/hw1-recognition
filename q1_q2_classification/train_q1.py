@@ -15,15 +15,20 @@ if __name__ == "__main__":
     # Create hyperparameter argument class with filled-in values
     # Use image size of 64x64 in Q1. Targeting mAP ~22 in 5 epochs
     ##################################################################
+    # Sweep (5 epochs, 64x64): lr=1e-3/bs=64 -> 0.24; lr=1e-3/bs=32 -> 0.24;
+    # lr=2e-3/bs=64 with decay at epoch 3 -> 0.22; lr=5e-4/bs=32 no decay -> 0.26.
+    # Smaller batches give more Adam steps; 1e-2 diverged (~0.06); decaying
+    # too early cut accuracy. step_size=5 means StepLR never fires in 5 epochs.
     args = ARGS(
         epochs=5,            # 5 epochs as targeted
         inp_size=64,         # Q1: 64x64 resolution
-        use_cuda=True,       # use GPU if available
-        val_every=70,        # validate every 70 steps (about one "epoch" on trainval split)
-        lr=1e-2,             # Adam default, good for small nets
-        batch_size=128,      # 128 is good compromise for speed/memory
-        step_size=2,         # decay learning rate every 2 epochs
-        gamma=0.5            # decay LR by half
+        use_cuda=True,       # use GPU if available (CUDA or MPS)
+        val_every=80,        # ~half an epoch at batch 32 (157 steps/epoch)
+        log_every=50,        # denser loss curve than the default 100
+        lr=5e-4,             # more stable than 1e-3/1e-2 for this small CNN
+        batch_size=32,       # more updates per epoch than 64/128
+        step_size=5,         # do not decay LR during these 5 epochs
+        gamma=0.5            # unused while step_size >= epochs
     )
     ##################################################################
     #                          END OF YOUR CODE                      #

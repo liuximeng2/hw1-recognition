@@ -111,16 +111,14 @@ class VOCDataset(Dataset):
         # in line 46 in simple_cnn.py
         ######################################################################
         # Keep H=W=self.size so SimpleCNN.flat_dim (from inp_size) stays valid.
-        # Pad-then-crop jitter on train; matching center crop on test is a no-op
-        # after Resize((size, size)), which is what we want at eval time.
+        # VOC objects have a canonical upright pose, so skip vertical flips.
+        # Mild photometric + pad-crop jitter; test uses a matching center crop.
         if self.split == 'test':
             return [transforms.CenterCrop(self.size)]
 
         return [
             transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.RandomRotation(15),
-            transforms.RandomApply([GaussianNoise(std=8.0)], p=0.5),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
             transforms.RandomCrop(self.size, padding=4),
         ]
         ######################################################################
